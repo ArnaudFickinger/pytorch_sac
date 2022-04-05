@@ -142,7 +142,7 @@ class Workspace(object):
 
             # run training update
             if self.step >= self.cfg.num_seed_steps:
-                self.agent.update(self.replay_buffer, self.logger, self.step)
+                self.agent.update(self.replay_buffer, self.logger, self.step, normalize_reward=self.cfg.normalize_reward)
 
             next_obs, reward, done, _ = self.env.step(action)
 

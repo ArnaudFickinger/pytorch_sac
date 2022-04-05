@@ -36,6 +36,8 @@ timeout_min: 3000
 project_name: sac
 wandb: true
 
+normalize_reward: false
+
 
 # hydra configuration
 hydra:
