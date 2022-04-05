@@ -127,9 +127,9 @@ class SACAgent(Agent):
             alpha_loss.backward()
             self.log_alpha_optimizer.step()
 
-    def update(self, replay_buffer, logger, step, normalize_reward=False):
+    def update(self, replay_buffer, logger, step):
         obs, action, reward, next_obs, not_done, not_done_no_max = replay_buffer.sample(
-            self.batch_size, normalize_reward=normalize_reward)
+            self.batch_size)
 
         logger.log('train/batch_reward', reward.mean(), step)
 

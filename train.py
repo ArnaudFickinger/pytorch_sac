@@ -68,7 +68,8 @@ class Workspace(object):
         self.replay_buffer = ReplayBuffer(self.env.observation_space.shape,
                                           self.env.action_space.shape,
                                           int(cfg.replay_buffer_capacity),
-                                          self.device)
+                                          self.device,
+                                          universe = self)
 
         self.video_recorder = VideoRecorder(wandb=self.cfg.wandb)
         self.step = 0
@@ -142,7 +143,7 @@ class Workspace(object):
 
             # run training update
             if self.step >= self.cfg.num_seed_steps:
-                self.agent.update(self.replay_buffer, self.logger, self.step, normalize_reward=self.cfg.normalize_reward)
+                self.agent.update(self.replay_buffer, self.logger, self.step)
 
             next_obs, reward, done, _ = self.env.step(action)
 

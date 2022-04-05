@@ -4,9 +4,10 @@ import torch
 
 class ReplayBuffer(object):
     """Buffer to store environment transitions."""
-    def __init__(self, obs_shape, action_shape, capacity, device):
+    def __init__(self, obs_shape, action_shape, capacity, device, universe):
         self.capacity = capacity
         self.device = device
+        self.universe = universe
 
         # the proprioceptive obs is stored as float32, pixels obs as uint8
         obs_dtype = np.float32 if len(obs_shape) == 1 else np.uint8
@@ -36,7 +37,7 @@ class ReplayBuffer(object):
         self.idx = (self.idx + 1) % self.capacity
         self.full = self.full or self.idx == 0
 
-    def sample(self, batch_size, normalize_reward=False):
+    def sample(self, batch_size):
         end_idxs = self.capacity if self.full else self.idx
         idxs = np.random.randint(0,
                                  self.capacity if self.full else self.idx,
@@ -45,7 +46,7 @@ class ReplayBuffer(object):
         obses = torch.as_tensor(self.obses[idxs], device=self.device).float()
         actions = torch.as_tensor(self.actions[idxs], device=self.device)
         rewards = self.rewards[idxs]
-        if normalize_reward:
+        if self.universe.cfg.normalize_reward:
             rewards = (rewards - self.rewards[:end_idxs].mean()) / (
                         1e-5 + self.rewards[:end_idxs].std())
         rewards = torch.as_tensor(rewards, device=self.device)
