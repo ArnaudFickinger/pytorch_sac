@@ -18,6 +18,7 @@ import utils
 
 import dmc2gym
 import hydra
+import wandb
 
 
 def make_env(cfg):
@@ -69,9 +70,11 @@ class Workspace(object):
                                           int(cfg.replay_buffer_capacity),
                                           self.device)
 
-        self.video_recorder = VideoRecorder(
-            self.work_dir if cfg.save_video else None)
+        self.video_recorder = VideoRecorder(wandb=self.cfg.wandb)
         self.step = 0
+        self.duration = 0
+        self.episode = 0
+        self.start = time.time()
 
     def evaluate(self):
         average_episode_reward = 0
@@ -89,40 +92,46 @@ class Workspace(object):
                 episode_reward += reward
 
             average_episode_reward += episode_reward
-            self.video_recorder.save(f'{self.step}.mp4')
+            self.video_recorder.save(self.evaluate_sample)
         average_episode_reward /= self.cfg.num_eval_episodes
         self.logger.log('eval/episode_reward', average_episode_reward,
                         self.step)
         self.logger.dump(self.step)
+        if self.cfg.wandb:
+            wandb.log({'Testing reward': average_episode_reward, 'Samples': self.step, 'Time': self.duration, 'Episodes': self.episode})
 
     def run(self):
-        episode, episode_reward, done = 0, 0, True
-        start_time = time.time()
+        episode_reward, done = 0, True
+        to_evaluate = False
         while self.step < self.cfg.num_train_steps:
+
             if done:
+                self.duration = time.time() - self.start
                 if self.step > 0:
                     self.logger.log('train/duration',
-                                    time.time() - start_time, self.step)
-                    start_time = time.time()
+                                    self.duration, self.step)
                     self.logger.dump(
                         self.step, save=(self.step > self.cfg.num_seed_steps))
 
-                # evaluate agent periodically
-                if self.step > 0 and self.step % self.cfg.eval_frequency == 0:
-                    self.logger.log('eval/episode', episode, self.step)
-                    self.evaluate()
+                    if to_evaluate:
+                        self.logger.log('eval/episode', self.episode, self.step)
+                        self.evaluate()
+                        to_evaluate = False
 
-                self.logger.log('train/episode_reward', episode_reward,
-                                self.step)
+                    self.logger.log('train/episode_reward', episode_reward,
+                                    self.step)
+
+                    if self.cfg.wandb:
+                        wandb.log({'Training reward': episode_reward, 'Samples': self.step, 'Time': self.duration, 'Episodes': self.episode})
 
                 obs = self.env.reset()
                 self.agent.reset()
                 done = False
                 episode_reward = 0
                 episode_step = 0
-                episode += 1
+                self.episode += 1
 
-                self.logger.log('train/episode', episode, self.step)
+                self.logger.log('train/episode', self.episode, self.step)
 
             # sample action for data collection
             if self.step < self.cfg.num_seed_steps:
@@ -149,9 +158,18 @@ class Workspace(object):
             episode_step += 1
             self.step += 1
 
+            if self.cfg.eval_frequency > 0 and self.step % self.cfg.eval_frequency == 0:
+                to_evaluate = True
+                self.evaluate_sample = self.step
+
+            if self.cfg.save_expert and self.step == self.cfg.num_train_steps:
+                torch.save(self.agent.actor.state_dict(), f'sac_actor_{self.cfg.env}_{self.step}.pth')
+
 
 @hydra.main(config_path='config', config_name='train.yaml')
 def main(cfg):
+    if cfg.wandb:
+        wandb.init(project=cfg.project_name, name=f'train_{cfg.env}', sync_tensorboard=False, config=cfg)
     workspace = Workspace(cfg)
     workspace.run()
 
