@@ -5,8 +5,6 @@ import sys
 
 import wandb
 
-import utils
-
 
 class VideoRecorder(object):
     def __init__(self, height=256, width=256, camera_id=0, fps=30, wandb=False):
