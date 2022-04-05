@@ -3,7 +3,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-import utils
+import utils_sac
 
 
 class DoubleQCritic(nn.Module):
@@ -11,11 +11,11 @@ class DoubleQCritic(nn.Module):
     def __init__(self, obs_dim, action_dim, hidden_dim, hidden_depth):
         super().__init__()
 
-        self.Q1 = utils.mlp(obs_dim + action_dim, hidden_dim, 1, hidden_depth)
-        self.Q2 = utils.mlp(obs_dim + action_dim, hidden_dim, 1, hidden_depth)
+        self.Q1 = utils_sac.mlp(obs_dim + action_dim, hidden_dim, 1, hidden_depth)
+        self.Q2 = utils_sac.mlp(obs_dim + action_dim, hidden_dim, 1, hidden_depth)
 
         self.outputs = dict()
-        self.apply(utils.weight_init)
+        self.apply(utils_sac.weight_init)
 
     def forward(self, obs, action):
         assert obs.size(0) == action.size(0)

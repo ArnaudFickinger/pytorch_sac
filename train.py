@@ -14,7 +14,7 @@ import pickle as pkl
 from video import VideoRecorder
 from logger import Logger
 from replay_buffer import ReplayBuffer
-import utils
+import utils_sac
 
 import dmc2gym
 import hydra
@@ -53,9 +53,9 @@ class Workspace(object):
                              log_frequency=cfg.log_frequency,
                              agent=cfg.agent.name)
 
-        utils.set_seed_everywhere(cfg.seed)
+        utils_sac.set_seed_everywhere(cfg.seed)
         self.device = torch.device(cfg.device)
-        self.env = utils.make_env(cfg)
+        self.env = utils_sac.make_env(cfg)
 
         cfg.agent.params.obs_dim = self.env.observation_space.shape[0]
         cfg.agent.params.action_dim = self.env.action_space.shape[0]
@@ -85,7 +85,7 @@ class Workspace(object):
             done = False
             episode_reward = 0
             while not done:
-                with utils.eval_mode(self.agent):
+                with utils_sac.eval_mode(self.agent):
                     action = self.agent.act(obs, sample=False)
                 obs, reward, done, _ = self.env.step(action)
                 self.video_recorder.record(self.env)
@@ -137,7 +137,7 @@ class Workspace(object):
             if self.step < self.cfg.num_seed_steps:
                 action = self.env.action_space.sample()
             else:
-                with utils.eval_mode(self.agent):
+                with utils_sac.eval_mode(self.agent):
                     action = self.agent.act(obs, sample=True)
 
             # run training update

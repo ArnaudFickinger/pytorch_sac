@@ -5,7 +5,7 @@ from torch import nn
 import torch.nn.functional as F
 from torch import distributions as pyd
 
-import utils
+import utils_sac
 
 
 class TanhTransform(pyd.transforms.Transform):
@@ -62,11 +62,11 @@ class DiagGaussianActor(nn.Module):
         super().__init__()
 
         self.log_std_bounds = log_std_bounds
-        self.trunk = utils.mlp(obs_dim, hidden_dim, 2 * action_dim,
+        self.trunk = utils_sac.mlp(obs_dim, hidden_dim, 2 * action_dim,
                                hidden_depth)
 
         self.outputs = dict()
-        self.apply(utils.weight_init)
+        self.apply(utils_sac.weight_init)
 
     def forward(self, obs):
         mu, log_std = self.trunk(obs).chunk(2, dim=-1)
