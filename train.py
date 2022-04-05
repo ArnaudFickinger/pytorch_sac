@@ -7,6 +7,7 @@ import copy
 import math
 import os
 import sys
+sys.path.insert(0,'/private/home/arnaudfickinger/gw_il')
 import time
 import pickle as pkl
 
@@ -149,7 +150,7 @@ class Workspace(object):
             self.step += 1
 
 
-@hydra.main(config_path='config/train.yaml', strict=True)
+@hydra.main(config_path='config', config_name='train.yaml')
 def main(cfg):
     workspace = Workspace(cfg)
     workspace.run()
