@@ -7,7 +7,7 @@ import copy
 import math
 import os
 import sys
-sys.path.insert(0,'/private/home/arnaudfickinger/gw_il')
+sys.path.insert(0,'/private/home/arnaudfickinger/pytorch_sac')
 import time
 import pickle as pkl
 
@@ -58,9 +58,9 @@ class Workspace(object):
         self.device = torch.device(cfg.device)
         self.env = utils_sac.make_env(cfg)
 
-        cfg.agent.params.obs_dim = self.env.observation_space.shape[0]
-        cfg.agent.params.action_dim = self.env.action_space.shape[0]
-        cfg.agent.params.action_range = [
+        cfg.agent.obs_dim = self.env.observation_space.shape[0]
+        cfg.agent.action_dim = self.env.action_space.shape[0]
+        cfg.agent.action_range = [
             float(self.env.action_space.low.min()),
             float(self.env.action_space.high.max())
         ]
