@@ -22,6 +22,8 @@ import wandb
 
 import pickle
 
+os.environ["WANDB_API_KEY"] = "0253801d5a4a70a326be214e03ac4f97c1d0beb1"
+
 
 def make_env(cfg):
     """Helper function to create dm_control environment"""

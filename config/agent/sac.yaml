@@ -6,8 +6,8 @@ agent:
   action_dim: ??? # to be specified later
   action_range: ??? # to be specified later
   device: ${device}
-  critic_cfg: ${double_q_critic}
-  actor_cfg: ${diag_gaussian_actor}
+  critic: ${double_q_critic}
+  actor: ${diag_gaussian_actor}
   discount: 0.99
   init_temperature: 0.1
   alpha_lr: 1e-4
