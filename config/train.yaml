@@ -34,6 +34,8 @@ gpus_per_node: 1
 cpus_per_task: 30
 timeout_min: 3000
 
+save_expert: false
+
 project_name: sac
 wandb: true
 
