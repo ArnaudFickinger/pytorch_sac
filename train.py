@@ -20,6 +20,8 @@ import dmc2gym
 import hydra
 import wandb
 
+import pickle
+
 
 def make_env(cfg):
     """Helper function to create dm_control environment"""
@@ -48,10 +50,11 @@ class Workspace(object):
 
         self.cfg = cfg
 
+        agent_name = cfg.agent._target_.split('.')[1]
         self.logger = Logger(self.work_dir,
                              save_tb=cfg.log_save_tb,
                              log_frequency=cfg.log_frequency,
-                             agent=cfg.agent.name)
+                             agent=agent_name)
 
         utils_sac.set_seed_everywhere(cfg.seed)
         self.device = torch.device(cfg.device)
@@ -101,9 +104,135 @@ class Workspace(object):
         if self.cfg.wandb:
             wandb.log({'Testing reward': average_episode_reward, 'Samples': self.step, 'Time': self.duration, 'Episodes': self.episode})
 
+    def save_expert_demo(self):
+        episode_rewards = []
+        episode_trajectories = []
+        episode_videos = []
+        if 'reacher' in self.cfg.env:
+            sav_qposs = []
+        for episode in range(self.cfg.num_eval_episodes):
+            episode_trajectories.append(
+                {'obs': [], 'pixel_obs': [], 'action': [], 'reward': []})
+            if self.cfg.dmc or 'Maze' in self.cfg.env:
+                episode_trajectories[-1]['dmc_obs'] = {}
+            episode_videos.append([])
+            obs = self.env.reset()
+            if 'reacher' in self.cfg.env:
+                assert self.env.current_qpos is not None
+                sav_qposs.append(np.copy(self.env.current_qpos))
+            # import pdb; pdb.set_trace()
+            if self.cfg.dmc:
+                for key in self.env.timestep.observation:
+                    if key not in episode_trajectories[-1]['dmc_obs']:
+                        episode_trajectories[-1]['dmc_obs'][key] = []
+                    episode_trajectories[-1]['dmc_obs'][key].append(self.env.timestep.observation[key])
+                if 'walker' in self.cfg.env:
+                    if 'position' not in episode_trajectories[-1]['dmc_obs']:
+                        episode_trajectories[-1]['dmc_obs']['position'] = []
+                    episode_trajectories[-1]['dmc_obs']['position'].append(self.env.physics.data.qpos[:].copy())
+                if 'cheetah' in self.cfg.env:
+                    # import pdb; pdb.set_trace()
+                    if 'orientations' not in episode_trajectories[-1]['dmc_obs']:
+                        episode_trajectories[-1]['dmc_obs']['orientations'] = []
+                    episode_trajectories[-1]['dmc_obs']['orientations'].append(
+                        self.env.physics.named.data.xmat[1:, ['xx', 'xz']].ravel())
+            elif 'Maze' in self.cfg.env:
+                # import pdb; pdb.set_trace()
+                obs_dic = self.env.get_obs_dic()
+                for key in obs_dic:
+                    if key not in episode_trajectories[-1]['dmc_obs']:
+                        episode_trajectories[-1]['dmc_obs'][key] = []
+                    episode_trajectories[-1]['dmc_obs'][key].append(obs_dic[key])
+            if 'swimmer' in self.cfg.env:
+                camera_swimmer = mujoco.Camera(self.env.physics)
+                camera_swimmer._render_camera.trackbodyid = _NO_BODY_TRACKED_INDEX
+                camera_swimmer._render_camera.fixedcamid = _FREE_CAMERA_INDEX
+                camera_swimmer._render_camera.type_ = enums.mjtCamera.mjCAMERA_FREE
+                import pdb;
+                pdb.set_trace()
+            episode_videos[-1].append(self.env.render(mode='rgb_array',
+                                                      height=256,
+                                                      width=256).transpose(2, 0, 1))
+            self.agent.reset()
+            done = False
+
+            episode_reward = 0
+            while not done:
+                with utils_sac.eval_mode(self.agent):
+                    action = self.agent.act(obs, sample=False)
+                episode_trajectories[-1]['obs'].append(obs)
+
+                episode_trajectories[-1]['pixel_obs'].append(self.env.render(mode='rgb_array',
+                                                                             height=84,
+                                                                             width=84).transpose(2, 0, 1))
+
+                obs, reward, done, info = self.env.step(action)
+                # import pdb; pdb.set_trace()
+                episode_videos[-1].append(self.env.render(mode='rgb_array',
+                                                          height=256,
+                                                          width=256).transpose(2, 0, 1))
+                episode_reward += reward
+
+                if not done:
+                    if self.cfg.dmc or 'Maze' in self.cfg.env:
+                        for key in info['dmc_obs']:
+                            if key not in episode_trajectories[-1]['dmc_obs']:
+                                episode_trajectories[-1]['dmc_obs'][key] = []
+                            episode_trajectories[-1]['dmc_obs'][key].append(info['dmc_obs'][key])
+                        if 'walker' in self.cfg.env:
+                            if 'position' not in episode_trajectories[-1]['dmc_obs']:
+                                episode_trajectories[-1]['dmc_obs']['position'] = []
+                            # print(self.env.physics.data.qpos[0])
+                            episode_trajectories[-1]['dmc_obs']['position'].append(self.env.physics.data.qpos[:].copy())
+                        if 'cheetah' in self.cfg.env:
+                            # import pdb; pdb.set_trace()
+                            if 'orientations' not in episode_trajectories[-1]['dmc_obs']:
+                                episode_trajectories[-1]['dmc_obs']['orientations'] = []
+                            episode_trajectories[-1]['dmc_obs']['orientations'].append(
+                                self.env.physics.named.data.xmat[1:, ['xx', 'xz']].ravel())
+
+                # episode_trajectories[-1]['nobs'].append(obs)
+                # episode_trajectories[-1]['pixel_nobs'].append(self.env.render(mode='rgb_array',
+                #                                                               height=84,
+                #                                                               width=84).transpose(2, 0, 1))
+                episode_trajectories[-1]['action'].append(action)
+                episode_trajectories[-1]['reward'].append(reward)
+
+            # assert False
+
+            episode_rewards.append(episode_reward)
+
+        best_episode = np.argmax(episode_rewards)
+        # print(f"best episode {best_episode}")
+        best_trajectory = episode_trajectories[best_episode]
+        best_trajectory.update({"cumulative_reward": episode_rewards[best_episode]})
+
+        best_trajectory['obs'] = np.stack(best_trajectory['obs'])
+        # best_trajectory['nobs'] = np.stack(best_trajectory['nobs'])
+        best_trajectory['pixel_obs'] = np.stack(best_trajectory['pixel_obs'])
+        # best_trajectory['pixel_nobs'] = np.stack(best_trajectory['pixel_nobs'])
+        best_trajectory['action'] = np.stack(best_trajectory['action'])
+        if 'reacher' in self.cfg.env:
+            best_trajectory['saved_qpos'] = sav_qposs[best_episode]
+        if self.cfg.dmc or 'Maze' in self.cfg.env:
+            for key in best_trajectory['dmc_obs']:
+                best_trajectory['dmc_obs'][key] = np.stack(best_trajectory['dmc_obs'][key])
+
+        # print(best_trajectory)
+
+        # import pdb; pdb.set_trace()
+
+        with open(f'/private/home/arnaudfickinger/hbisim/expert_demonstrations/expert_trajectory_{self.cfg.env}_{self.save_demo_sample}.pickle',
+                  'wb') as handle:
+            pickle.dump(best_trajectory, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        if self.cfg.wandb:
+            wandb.log({f"Expert Demonstration {self.save_demo_sample}": wandb.Video(np.stack(episode_videos[best_episode], axis=0), fps=30,
+                                                            format="mp4")})
+
     def run(self):
         episode_reward, done = 0, True
         to_evaluate = False
+        to_save_demo = True
         while self.step < self.cfg.num_train_steps:
 
             if done:
@@ -116,6 +245,10 @@ class Workspace(object):
 
                     if to_evaluate:
                         self.logger.log('eval/episode', self.episode, self.step)
+                        self.evaluate()
+                        to_evaluate = False
+
+                    if to_save_demo:
                         self.evaluate()
                         to_evaluate = False
 
@@ -157,11 +290,16 @@ class Workspace(object):
 
             obs = next_obs
             episode_step += 1
+
+            if self.cfg.save_demo_frequency> 0 and self.step % self.cfg.save_demo_frequency == 0:
+                to_save_demo = True
+                self.evaluate_sample = self.step
+
             self.step += 1
 
             if self.cfg.eval_frequency > 0 and self.step % self.cfg.eval_frequency == 0:
                 to_evaluate = True
-                self.evaluate_sample = self.step
+                self.save_demo_sample = self.step
 
             if self.cfg.save_expert and self.step == self.cfg.num_train_steps:
                 torch.save(self.agent.actor.state_dict(), f'sac_actor_{self.cfg.env}_{self.step}.pth')
