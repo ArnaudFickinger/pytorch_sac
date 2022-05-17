@@ -37,15 +37,14 @@ def make_env(cfg):
     env = dmc2gym.make(
         domain_name=domain_name,
         task_name=task_name,
-        resource_files=cfg.resource_files,
-        img_source=cfg.img_source,
-        total_frames=cfg.total_frames,
+        resource_files='',
+        img_source=None,
+        total_frames=1000,
         seed=cfg.seed,
         visualize_reward=False,
         from_pixels=(cfg.encoder_type == 'pixel'),
-        height=cfg.image_size,
-        width=cfg.image_size,
-        frame_skip=cfg.action_repeat
+        height=84,
+        width=84
     )
     env.seed(cfg.seed)
 
