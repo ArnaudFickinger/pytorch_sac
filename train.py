@@ -112,25 +112,25 @@ class Workspace(object):
         for episode in range(self.cfg.num_eval_episodes):
             episode_trajectories.append(
                 {'obs': [], 'pixel_obs': [], 'action': [], 'reward': []})
-            episode_trajectories[-1]['dmc_obs'] = {}
+            # episode_trajectories[-1]['dmc_obs'] = {}
             episode_videos.append([])
             obs = self.env.reset()
 
             # import pdb; pdb.set_trace()
-            for key in self.env.timestep.observation:
-                if key not in episode_trajectories[-1]['dmc_obs']:
-                    episode_trajectories[-1]['dmc_obs'][key] = []
-                episode_trajectories[-1]['dmc_obs'][key].append(self.env.timestep.observation[key])
-            if 'walker' in self.cfg.env:
-                if 'position' not in episode_trajectories[-1]['dmc_obs']:
-                    episode_trajectories[-1]['dmc_obs']['position'] = []
-                episode_trajectories[-1]['dmc_obs']['position'].append(self.env.physics.data.qpos[:].copy())
-            if 'cheetah' in self.cfg.env:
-                # import pdb; pdb.set_trace()
-                if 'orientations' not in episode_trajectories[-1]['dmc_obs']:
-                    episode_trajectories[-1]['dmc_obs']['orientations'] = []
-                episode_trajectories[-1]['dmc_obs']['orientations'].append(
-                    self.env.physics.named.data.xmat[1:, ['xx', 'xz']].ravel())
+            # for key in self.env.timestep.observation:
+            #     if key not in episode_trajectories[-1]['dmc_obs']:
+            #         episode_trajectories[-1]['dmc_obs'][key] = []
+            #     episode_trajectories[-1]['dmc_obs'][key].append(self.env.timestep.observation[key])
+            # if 'walker' in self.cfg.env:
+            #     if 'position' not in episode_trajectories[-1]['dmc_obs']:
+            #         episode_trajectories[-1]['dmc_obs']['position'] = []
+            #     episode_trajectories[-1]['dmc_obs']['position'].append(self.env.physics.data.qpos[:].copy())
+            # if 'cheetah' in self.cfg.env:
+            #     # import pdb; pdb.set_trace()
+            #     if 'orientations' not in episode_trajectories[-1]['dmc_obs']:
+            #         episode_trajectories[-1]['dmc_obs']['orientations'] = []
+            #     episode_trajectories[-1]['dmc_obs']['orientations'].append(
+            #         self.env.physics.named.data.xmat[1:, ['xx', 'xz']].ravel())
 
             episode_videos[-1].append(self.env.render(mode='rgb_array',
                                                       height=256,
@@ -155,22 +155,22 @@ class Workspace(object):
                                                           width=256).transpose(2, 0, 1))
                 episode_reward += reward
 
-                if not done:
-                    for key in info['dmc_obs']:
-                        if key not in episode_trajectories[-1]['dmc_obs']:
-                            episode_trajectories[-1]['dmc_obs'][key] = []
-                        episode_trajectories[-1]['dmc_obs'][key].append(info['dmc_obs'][key])
-                    if 'walker' in self.cfg.env:
-                        if 'position' not in episode_trajectories[-1]['dmc_obs']:
-                            episode_trajectories[-1]['dmc_obs']['position'] = []
-                        # print(self.env.physics.data.qpos[0])
-                        episode_trajectories[-1]['dmc_obs']['position'].append(self.env.physics.data.qpos[:].copy())
-                    if 'cheetah' in self.cfg.env:
-                        # import pdb; pdb.set_trace()
-                        if 'orientations' not in episode_trajectories[-1]['dmc_obs']:
-                            episode_trajectories[-1]['dmc_obs']['orientations'] = []
-                        episode_trajectories[-1]['dmc_obs']['orientations'].append(
-                            self.env.physics.named.data.xmat[1:, ['xx', 'xz']].ravel())
+                # if not done:
+                    # for key in info['dmc_obs']:
+                    #     if key not in episode_trajectories[-1]['dmc_obs']:
+                    #         episode_trajectories[-1]['dmc_obs'][key] = []
+                    #     episode_trajectories[-1]['dmc_obs'][key].append(info['dmc_obs'][key])
+                    # if 'walker' in self.cfg.env:
+                    #     if 'position' not in episode_trajectories[-1]['dmc_obs']:
+                    #         episode_trajectories[-1]['dmc_obs']['position'] = []
+                    #     # print(self.env.physics.data.qpos[0])
+                    #     episode_trajectories[-1]['dmc_obs']['position'].append(self.env.physics.data.qpos[:].copy())
+                    # if 'cheetah' in self.cfg.env:
+                    #     # import pdb; pdb.set_trace()
+                    #     if 'orientations' not in episode_trajectories[-1]['dmc_obs']:
+                    #         episode_trajectories[-1]['dmc_obs']['orientations'] = []
+                    #     episode_trajectories[-1]['dmc_obs']['orientations'].append(
+                    #         self.env.physics.named.data.xmat[1:, ['xx', 'xz']].ravel())
 
                 # episode_trajectories[-1]['nobs'].append(obs)
                 # episode_trajectories[-1]['pixel_nobs'].append(self.env.render(mode='rgb_array',
@@ -194,8 +194,8 @@ class Workspace(object):
         # best_trajectory['pixel_nobs'] = np.stack(best_trajectory['pixel_nobs'])
         best_trajectory['action'] = np.stack(best_trajectory['action'])
 
-        for key in best_trajectory['dmc_obs']:
-            best_trajectory['dmc_obs'][key] = np.stack(best_trajectory['dmc_obs'][key])
+        # for key in best_trajectory['dmc_obs']:
+        #     best_trajectory['dmc_obs'][key] = np.stack(best_trajectory['dmc_obs'][key])
 
         # print(best_trajectory)
 
