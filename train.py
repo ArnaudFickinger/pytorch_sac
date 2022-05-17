@@ -211,7 +211,7 @@ class Workspace(object):
     def run(self):
         episode_reward, done = 0, True
         to_evaluate = False
-        to_save_demo = True
+        to_save_demo = False
         while self.step < self.cfg.num_train_steps:
 
             if done:
@@ -228,8 +228,8 @@ class Workspace(object):
                         to_evaluate = False
 
                     if to_save_demo:
-                        self.evaluate()
-                        to_evaluate = False
+                        self.save_expert_demo()
+                        to_save_demo = False
 
                     self.logger.log('train/episode_reward', episode_reward,
                                     self.step)
@@ -272,13 +272,13 @@ class Workspace(object):
 
             if self.cfg.save_demo_frequency> 0 and self.step % self.cfg.save_demo_frequency == 0:
                 to_save_demo = True
-                self.evaluate_sample = self.step
+                self.save_demo_sample = self.step
 
             self.step += 1
 
             if self.cfg.eval_frequency > 0 and self.step % self.cfg.eval_frequency == 0:
                 to_evaluate = True
-                self.save_demo_sample = self.step
+                self.evaluate_sample = self.step
 
             if self.cfg.save_expert and self.step == self.cfg.num_train_steps:
                 torch.save(self.agent.actor.state_dict(), f'sac_actor_{self.cfg.env}_{self.step}.pth')
