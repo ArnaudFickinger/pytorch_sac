@@ -34,20 +34,11 @@ def make_env(cfg):
         domain_name = cfg.env.split('_')[0]
         task_name = '_'.join(cfg.env.split('_')[1:])
 
-    env = dmc2gym.make(
-        domain_name=domain_name,
-        task_name=task_name,
-        resource_files='',
-        img_source=None,
-        total_frames=1000,
-        seed=cfg.seed,
-        visualize_reward=False,
-        from_pixels=(cfg.encoder_type == 'pixel'),
-        height=84,
-        width=84
-    )
+    env = dmc2gym.make(domain_name=domain_name,
+                       task_name=task_name,
+                       seed=cfg.seed,
+                       visualize_reward=False)
     env.seed(cfg.seed)
-
     assert env.action_space.low.min() >= -1
     assert env.action_space.high.max() <= 1
 
