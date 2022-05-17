@@ -287,7 +287,7 @@ class Workspace(object):
 @hydra.main(config_path='config', config_name='train.yaml')
 def main(cfg):
     if cfg.wandb:
-        wandb.init(project=cfg.project_name, name=f'train_{cfg.env}', sync_tensorboard=False, config=cfg)
+        wandb.init(project=cfg.project_name, name=cfg.experiment, sync_tensorboard=False, config=cfg)
     workspace = Workspace(cfg)
     workspace.run()
 
