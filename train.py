@@ -37,7 +37,7 @@ def make_env(cfg):
     env = dmc2gym.make(domain_name=domain_name,
                        task_name=task_name,
                        seed=cfg.seed,
-                       visualize_reward=True)
+                       visualize_reward=False)
     env.seed(cfg.seed)
     assert env.action_space.low.min() >= -1
     assert env.action_space.high.max() <= 1
