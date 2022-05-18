@@ -11,7 +11,7 @@ def make(
 
     img_source=None,
     total_frames=1000,
-    resource_files = '/private/home/arnaudfickinger/hbisim/expert_demonstrations/pendulum_demonstration.pickle',
+    resource_files = '/private/home/arnaudfickinger/disentangled_bisimulation/frames',
     seed=1,
 
     visualize_reward=True,
