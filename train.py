@@ -208,11 +208,11 @@ class Workspace(object):
                   'wb') as handle:
             pickle.dump(best_trajectory, handle, protocol=pickle.HIGHEST_PROTOCOL)
         if self.cfg.wandb:
-            wandb.log({f"Expert Demonstration Distraction {self.save_demo_sample}": wandb.Video(best_trajectory['obs_distraction'], fps=30,
-                                                            format="mp4")})
+            # wandb.log({f"Expert Demonstration Distraction {self.save_demo_sample}": wandb.Video(best_trajectory['obs_distraction'], fps=30,
+            #                                                 format="gif")})
             wandb.log({f"Expert Demonstration No Distraction {self.save_demo_sample}": wandb.Video(
                 best_trajectory['obs_no_distraction'], fps=30,
-                format="mp4")})
+                format="gif")})
 
     def run(self):
         episode_reward, done = 0, True

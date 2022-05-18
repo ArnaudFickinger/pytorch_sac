@@ -58,7 +58,7 @@ class DMCWrapper(core.Env):
         height=84,
         width=84,
         camera_id=0,
-        frame_skip=1,
+        frame_skip=4,
         environment_kwargs=None
     ):
         assert 'random' in task_kwargs, 'please specify a seed, for deterministic behaviour'
