@@ -5,7 +5,7 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 import sys
-sys.path.insert(0,'/private/home/arnaudfickinger/hbisim')
+sys.path.insert(0,'/private/home/arnaudfickinger/pytorch_sac')
 import numpy as np
 import cv2
 import skvideo.io

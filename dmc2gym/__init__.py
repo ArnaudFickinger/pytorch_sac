@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0,'/private/home/arnaudfickinger/hbisim')
+sys.path.insert(0,'/private/home/arnaudfickinger/pytorch_sac')
 import gym
 from gym.envs.registration import register
 

@@ -17,7 +17,7 @@ import wandb
 from dmc2gym import natural_imgsource
 
 class VideoRecorder(object):
-    def __init__(self, dir_name, wandb, resource_files, img_source, total_frames, height=256, width=256, camera_id=0, fps=30):
+    def __init__(self, dir_name, wandb=True, resource_files='', img_source=None, total_frames=1000, height=256, width=256, camera_id=0, fps=30):
         self.dir_name = dir_name
         self.height = height
         self.width = width
