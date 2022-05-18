@@ -111,7 +111,7 @@ class Workspace(object):
 
         for episode in range(self.cfg.num_eval_episodes):
             episode_trajectories.append(
-                {'obs': [], 'pixel_obs': [], 'action': [], 'reward': []})
+                {'state': [], 'obs_distraction': [], 'obs_no_distraction': [], 'action': [], 'reward': []})
             # episode_trajectories[-1]['dmc_obs'] = {}
             episode_videos.append([])
             obs = self.env.reset()
@@ -132,27 +132,31 @@ class Workspace(object):
             #     episode_trajectories[-1]['dmc_obs']['orientations'].append(
             #         self.env.physics.named.data.xmat[1:, ['xx', 'xz']].ravel())
 
-            episode_videos[-1].append(self.env.render(mode='rgb_array',
-                                                      height=256,
-                                                      width=256).transpose(2, 0, 1))
+            # episode_videos[-1].append(self.env.render(mode='rgb_array',
+            #                                           height=256,
+            #                                           width=256).transpose(2, 0, 1))
             self.agent.reset()
+            obs_no_distraction, obs_distraction = self.env.get_extra()
+
+            episode_trajectories[-1]['obs_distraction'].append(obs_distraction)
+            episode_trajectories[-1]['obs_no_distraction'].append(obs_no_distraction)
             done = False
 
             episode_reward = 0
             while not done:
                 with utils_sac.eval_mode(self.agent):
                     action = self.agent.act(obs, sample=False)
-                episode_trajectories[-1]['obs'].append(obs)
-
-                episode_trajectories[-1]['pixel_obs'].append(self.env.render(mode='rgb_array',
-                                                                             height=84,
-                                                                             width=84).transpose(2, 0, 1))
+                episode_trajectories[-1]['state'].append(obs)
 
                 obs, reward, done, info = self.env.step(action)
                 # import pdb; pdb.set_trace()
-                episode_videos[-1].append(self.env.render(mode='rgb_array',
-                                                          height=256,
-                                                          width=256).transpose(2, 0, 1))
+                # episode_videos[-1].append(self.env.render(mode='rgb_array',
+                #                                           height=256,
+                #                                           width=256).transpose(2, 0, 1))
+
+                episode_trajectories[-1]['obs_distraction'].append(info['obs_distraction'])
+                episode_trajectories[-1]['obs_no_distraction'].append(info['obs_no_distraction'])
+
                 episode_reward += reward
 
                 # if not done:
@@ -188,9 +192,10 @@ class Workspace(object):
         best_trajectory = episode_trajectories[best_episode]
         best_trajectory.update({"cumulative_reward": episode_rewards[best_episode]})
 
-        best_trajectory['obs'] = np.stack(best_trajectory['obs'])
+        best_trajectory['state'] = np.stack(best_trajectory['state'])
         # best_trajectory['nobs'] = np.stack(best_trajectory['nobs'])
-        best_trajectory['pixel_obs'] = np.stack(best_trajectory['pixel_obs'])
+        best_trajectory['obs_distraction'] = np.stack(best_trajectory['obs_distraction'])
+        best_trajectory['obs_no_distraction'] = np.stack(best_trajectory['obs_no_distraction'])
         # best_trajectory['pixel_nobs'] = np.stack(best_trajectory['pixel_nobs'])
         best_trajectory['action'] = np.stack(best_trajectory['action'])
 
@@ -205,8 +210,11 @@ class Workspace(object):
                   'wb') as handle:
             pickle.dump(best_trajectory, handle, protocol=pickle.HIGHEST_PROTOCOL)
         if self.cfg.wandb:
-            wandb.log({f"Expert Demonstration {self.save_demo_sample}": wandb.Video(np.stack(episode_videos[best_episode], axis=0), fps=30,
+            wandb.log({f"Expert Demonstration Distraction {self.save_demo_sample}": wandb.Video(best_trajectory['obs_distraction'], fps=30,
                                                             format="mp4")})
+            wandb.log({f"Expert Demonstration No Distraction {self.save_demo_sample}": wandb.Video(
+                best_trajectory['obs_no_distraction'], fps=30,
+                format="mp4")})
 
     def run(self):
         episode_reward, done = 0, True
