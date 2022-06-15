@@ -8,6 +8,8 @@ from dm_env import specs
 import numpy as np
 import skimage.io
 
+from collections import deque
+
 from os import listdir
 from os.path import isfile, join
 
@@ -68,6 +70,10 @@ class DMCWrapper(core.Env):
         self._camera_id = camera_id
         self._frame_skip = frame_skip
         self._img_source = img_source
+
+        self._frames_no_distraction = deque([], maxlen=3)
+        self._frames_distraction = deque([], maxlen=3)
+
 
         # create task
         self._env = suite.load(
@@ -166,6 +172,11 @@ class DMCWrapper(core.Env):
 
         return obs_no_distraction, obs_distraction
 
+    def get_extra_stack(self):
+        assert len(self._frames_no_distraction) == 3
+        assert len(self._frames_distraction) == 3
+        return np.concatenate(list(self._frames_no_distraction), axis=0), np.concatenate(list(self._frames_distraction), axis=0)
+
 
     def _convert_action(self, action):
         action = action.astype(np.float64)
@@ -193,6 +204,9 @@ class DMCWrapper(core.Env):
         self._norm_action_space.seed(seed)
         self._observation_space.seed(seed)
 
+    def get_internal_state(self):
+        return self._env.physics.get_state().copy()
+
     def step(self, action):
         assert self._norm_action_space.contains(action)
         action = self._convert_action(action)
@@ -208,15 +222,24 @@ class DMCWrapper(core.Env):
                 break
         obs = self._get_obs(time_step)
         obs_no_distraction, obs_distraction = self.get_extra()
+        self._frames_no_distraction.append(obs_no_distraction)
+        self._frames_distraction.append(obs_distraction)
+        obs_no_distraction_stack, obs_distraction_stack = self.env.get_extra_stack()
 
         extra['discount'] = time_step.discount
         extra['obs_no_distraction'] = obs_no_distraction
         extra['obs_distraction'] = obs_distraction
+        extra['obs_no_distraction_stack'] = obs_no_distraction_stack
+        extra['obs_distraction_stack'] = obs_distraction_stack
         return obs, reward, done, extra
 
     def reset(self):
         time_step = self._env.reset()
         obs = self._get_obs(time_step)
+        obs_no_distraction, obs_distraction = self.get_extra()
+        for _ in range(3):
+            self._frames_no_distraction.append(obs_no_distraction)
+            self._frames_distraction.append(obs_distraction)
         return obs
 
     def render(self, mode='rgb_array', height=None, width=None, camera_id=0):

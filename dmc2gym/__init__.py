@@ -14,12 +14,12 @@ def make(
     resource_files = '/private/home/arnaudfickinger/disentangled_bisimulation/frames',
     seed=1,
 
-    visualize_reward=True,
+    visualize_reward=False,
     from_pixels=False,
     height=84,
     width=84,
     camera_id=0,
-    frame_skip=1,
+    frame_skip=4,
     episode_length=1000,
     environment_kwargs=None
 ):

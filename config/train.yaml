@@ -16,6 +16,9 @@ eval_frequency: 10000
 save_demo_frequency: 100000
 num_eval_episodes: 1
 
+action_repeat: 4
+frame_stack: 3
+
 device: cuda
 
 # logger
