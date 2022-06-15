@@ -224,7 +224,7 @@ class DMCWrapper(core.Env):
         obs_no_distraction, obs_distraction = self.get_extra()
         self._frames_no_distraction.append(obs_no_distraction)
         self._frames_distraction.append(obs_distraction)
-        obs_no_distraction_stack, obs_distraction_stack = self.env.get_extra_stack()
+        obs_no_distraction_stack, obs_distraction_stack = self.get_extra_stack()
 
         extra['discount'] = time_step.discount
         extra['obs_no_distraction'] = obs_no_distraction
