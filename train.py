@@ -159,11 +159,12 @@ class Workspace(object):
                 #                                           height=256,
                 #                                           width=256).transpose(2, 0, 1))
 
-                episode_trajectories[-1]['hd_obs_distraction'].append(info['obs_distraction'])
-                episode_trajectories[-1]['hd_obs_no_distraction'].append(info['obs_no_distraction'])
-                episode_trajectories[-1]['hd_obs_distraction_stack'].append(info['obs_distraction_stack'])
-                episode_trajectories[-1]['hd_obs_no_distraction_stack'].append(info['obs_no_distraction_stack'])
-                episode_trajectories[-1]['internal_state'].append(info['internal_state'])
+                if not done:
+                    episode_trajectories[-1]['hd_obs_distraction'].append(info['obs_distraction'])
+                    episode_trajectories[-1]['hd_obs_no_distraction'].append(info['obs_no_distraction'])
+                    episode_trajectories[-1]['hd_obs_distraction_stack'].append(info['obs_distraction_stack'])
+                    episode_trajectories[-1]['hd_obs_no_distraction_stack'].append(info['obs_no_distraction_stack'])
+                    episode_trajectories[-1]['internal_state'].append(info['internal_state'])
 
                 episode_reward += reward
 
@@ -209,8 +210,9 @@ class Workspace(object):
         best_trajectory['hd_obs_no_distraction_stack'] = np.stack(best_trajectory['hd_obs_no_distraction_stack'])
         # best_trajectory['pixel_nobs'] = np.stack(best_trajectory['pixel_nobs'])
         best_trajectory['action'] = np.stack(best_trajectory['action'])
+        best_trajectory['reward'] = np.stack(best_trajectory['reward'])
 
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
 
         # for key in best_trajectory['dmc_obs']:
         #     best_trajectory['dmc_obs'][key] = np.stack(best_trajectory['dmc_obs'][key])
