@@ -157,6 +157,15 @@ class DMCWrapper(core.Env):
             obs = _flatten_obs(time_step.observation)
         return obs
 
+    def get_render(self):
+        obs = self.render(
+            height=256,
+            width=256,
+            camera_id=self._camera_id
+        )
+        obs_no_distraction = obs.transpose(2, 0, 1).copy()
+        return obs_no_distraction
+
     def get_extra(self):
         obs = self.render(
             height=self._height,
@@ -225,9 +234,11 @@ class DMCWrapper(core.Env):
         self._frames_no_distraction.append(obs_no_distraction)
         self._frames_distraction.append(obs_distraction)
         obs_no_distraction_stack, obs_distraction_stack = self.get_extra_stack()
+        obs_render = self.get_render()
 
         extra['discount'] = time_step.discount
         extra['obs_no_distraction'] = obs_no_distraction
+        extra['obs_render'] = obs_render
         extra['obs_distraction'] = obs_distraction
         extra['obs_no_distraction_stack'] = obs_no_distraction_stack
         extra['obs_distraction_stack'] = obs_distraction_stack

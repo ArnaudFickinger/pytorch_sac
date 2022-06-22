@@ -111,7 +111,8 @@ class Workspace(object):
         for episode in range(self.cfg.num_eval_episodes):
             episode_trajectories.append(
                 {'internal_state': [], 'ld_obs': [], 'hd_obs_distraction': [], 'hd_obs_distraction_stack': [],
-                 'hd_obs_no_distraction': [], 'hd_obs_no_distraction_stack': [], 'action': [], 'reward': []})
+                 'hd_obs_no_distraction': [], 'hd_obs_no_distraction_stack': [], 'action': [], 'reward': [],
+                 'obs_render': []})
             # episode_trajectories[-1]['dmc_obs'] = {}
             episode_videos.append([])
             obs = self.env.reset()
@@ -138,8 +139,10 @@ class Workspace(object):
             self.agent.reset()
             obs_no_distraction, obs_distraction = self.env.get_extra()
             obs_no_distraction_stack, obs_distraction_stack = self.env.get_extra_stack()
+            obs_render = self.env.get_render()
 
             episode_trajectories[-1]['hd_obs_distraction'].append(obs_distraction)
+            episode_trajectories[-1]['obs_render'].append(obs_render)
             episode_trajectories[-1]['hd_obs_no_distraction'].append(obs_no_distraction)
             episode_trajectories[-1]['hd_obs_distraction_stack'].append(obs_distraction_stack)
             episode_trajectories[-1]['hd_obs_no_distraction_stack'].append(obs_no_distraction_stack)
@@ -161,6 +164,7 @@ class Workspace(object):
 
                 if not done:
                     episode_trajectories[-1]['hd_obs_distraction'].append(info['obs_distraction'])
+                    episode_trajectories[-1]['obs_render'].append(info['obs_render'])
                     episode_trajectories[-1]['hd_obs_no_distraction'].append(info['obs_no_distraction'])
                     episode_trajectories[-1]['hd_obs_distraction_stack'].append(info['obs_distraction_stack'])
                     episode_trajectories[-1]['hd_obs_no_distraction_stack'].append(info['obs_no_distraction_stack'])
@@ -205,6 +209,7 @@ class Workspace(object):
         best_trajectory['ld_obs'] = np.stack(best_trajectory['ld_obs'])
         # best_trajectory['nobs'] = np.stack(best_trajectory['nobs'])
         best_trajectory['hd_obs_distraction'] = np.stack(best_trajectory['hd_obs_distraction'])
+        best_trajectory['obs_render'] = np.stack(best_trajectory['obs_render'])
         best_trajectory['hd_obs_no_distraction'] = np.stack(best_trajectory['hd_obs_no_distraction'])
         best_trajectory['hd_obs_distraction_stack'] = np.stack(best_trajectory['hd_obs_distraction_stack'])
         best_trajectory['hd_obs_no_distraction_stack'] = np.stack(best_trajectory['hd_obs_no_distraction_stack'])
