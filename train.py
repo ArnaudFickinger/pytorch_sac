@@ -24,9 +24,22 @@ import pickle
 
 os.environ["WANDB_API_KEY"] = "0253801d5a4a70a326be214e03ac4f97c1d0beb1"
 
+def make_maze(cfg):
+    from gym.envs.mujoco import mujoco_env
+    from gym.wrappers import TimeLimit
+    from maze_envs import MazeEnd_PointMass
+    maze_id = int(cfg.env.split('_')[1])
+    env = MazeEnd_PointMass(maze_id=maze_id)
+
+    if cfg.time_limit > 0:
+        env = TimeLimit(env, cfg.time_limit)
+    return env
 
 def make_env(cfg):
     """Helper function to create dm_control environment"""
+    if 'Maze' in cfg.env:
+        return make_maze(cfg)
+
     if cfg.env == 'ball_in_cup_catch':
         domain_name = 'ball_in_cup'
         task_name = 'catch'
@@ -240,7 +253,7 @@ class Workspace(object):
         episode_reward, done = 0, True
         to_evaluate = False
         to_save_demo = False
-        while self.step < self.cfg.num_train_steps:
+        while self.step <= self.cfg.num_train_steps:
 
             if done:
                 self.duration = time.time() - self.start

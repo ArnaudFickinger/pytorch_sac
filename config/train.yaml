@@ -28,7 +28,6 @@ log_save_tb: true
 # video recorder
 save_video: true
 
-
 seed: 1
 
 comment: ''
@@ -43,6 +42,8 @@ project_name: sac
 wandb: true
 
 normalize_reward: false
+
+time_limit: 100
 
 
 # hydra configuration
