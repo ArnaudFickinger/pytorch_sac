@@ -340,7 +340,7 @@ class Workspace(object):
                 self.evaluate_sample = self.step
 
             if self.cfg.save_expert and self.step == self.cfg.num_train_steps:
-                torch.save(self.agent.actor.state_dict(), f'sac_actor_{self.cfg.env}_{self.step}.pth')
+                torch.save(self.agent.actor.state_dict(), f'/private/home/arnaudfickinger/pytorch_sac/experts/sac_actor_{self.cfg.env}_{self.step}.pth')
 
 
 @hydra.main(config_path='config', config_name='train.yaml')
