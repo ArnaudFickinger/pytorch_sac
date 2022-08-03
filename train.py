@@ -122,10 +122,16 @@ class Workspace(object):
         episode_videos = []
 
         for episode in range(self.cfg.num_eval_episodes):
-            episode_trajectories.append(
-                {'internal_state': [], 'ld_obs': [], 'hd_obs_distraction': [], 'hd_obs_distraction_stack': [],
-                 'hd_obs_no_distraction': [], 'hd_obs_no_distraction_stack': [], 'action': [], 'reward': [],
-                 'obs_render': []})
+            if 'Maze' in self.cfg.env:
+                episode_trajectories.append(
+                    {'ld_obs': [],
+                     'hd_obs_no_distraction': [], 'hd_obs_no_distraction_stack': [], 'action': [], 'reward': [],
+                     'obs_render': []})
+            else:
+                episode_trajectories.append(
+                    {'internal_state': [], 'ld_obs': [], 'hd_obs_distraction': [], 'hd_obs_distraction_stack': [],
+                     'hd_obs_no_distraction': [], 'hd_obs_no_distraction_stack': [], 'action': [], 'reward': [],
+                     'obs_render': []})
             # episode_trajectories[-1]['dmc_obs'] = {}
             episode_videos.append([])
             obs = self.env.reset()
@@ -150,16 +156,22 @@ class Workspace(object):
             #                                           height=256,
             #                                           width=256).transpose(2, 0, 1))
             self.agent.reset()
-            obs_no_distraction, obs_distraction = self.env.get_extra()
-            obs_no_distraction_stack, obs_distraction_stack = self.env.get_extra_stack()
+            if 'Maze' not in self.cfg.env:
+                obs_no_distraction, obs_distraction = self.env.get_extra()
+                obs_no_distraction_stack, obs_distraction_stack = self.env.get_extra_stack()
+            else:
+                obs_no_distraction, obs_distraction = self.env.get_extra()
+                obs_no_distraction_stack, obs_distraction_stack = self.env.get_extra_stack()
             obs_render = self.env.get_render()
 
-            episode_trajectories[-1]['hd_obs_distraction'].append(obs_distraction)
             episode_trajectories[-1]['obs_render'].append(obs_render)
             episode_trajectories[-1]['hd_obs_no_distraction'].append(obs_no_distraction)
             episode_trajectories[-1]['hd_obs_distraction_stack'].append(obs_distraction_stack)
             episode_trajectories[-1]['hd_obs_no_distraction_stack'].append(obs_no_distraction_stack)
-            episode_trajectories[-1]['internal_state'].append(self.env.get_internal_state())
+
+            if 'Maze' not in self.cfg.env:
+                episode_trajectories[-1]['internal_state'].append(self.env.get_internal_state())
+                episode_trajectories[-1]['hd_obs_distraction'].append(obs_distraction)
             done = False
 
             episode_reward = 0
@@ -176,12 +188,13 @@ class Workspace(object):
                 #                                           width=256).transpose(2, 0, 1))
 
                 if not done:
-                    episode_trajectories[-1]['hd_obs_distraction'].append(info['obs_distraction'])
                     episode_trajectories[-1]['obs_render'].append(info['obs_render'])
                     episode_trajectories[-1]['hd_obs_no_distraction'].append(info['obs_no_distraction'])
-                    episode_trajectories[-1]['hd_obs_distraction_stack'].append(info['obs_distraction_stack'])
                     episode_trajectories[-1]['hd_obs_no_distraction_stack'].append(info['obs_no_distraction_stack'])
                     episode_trajectories[-1]['internal_state'].append(info['internal_state'])
+                    if 'Maze' not in self.cfg.env:
+                        episode_trajectories[-1]['hd_obs_distraction_stack'].append(info['obs_distraction_stack'])
+                        episode_trajectories[-1]['hd_obs_distraction'].append(info['obs_distraction'])
 
                 episode_reward += reward
 
@@ -218,17 +231,18 @@ class Workspace(object):
         best_trajectory = episode_trajectories[best_episode]
         best_trajectory.update({"cumulative_reward": episode_rewards[best_episode]})
 
-        best_trajectory['internal_state'] = np.stack(best_trajectory['internal_state'])
         best_trajectory['ld_obs'] = np.stack(best_trajectory['ld_obs'])
         # best_trajectory['nobs'] = np.stack(best_trajectory['nobs'])
-        best_trajectory['hd_obs_distraction'] = np.stack(best_trajectory['hd_obs_distraction'])
         best_trajectory['obs_render'] = np.stack(best_trajectory['obs_render'])
         best_trajectory['hd_obs_no_distraction'] = np.stack(best_trajectory['hd_obs_no_distraction'])
-        best_trajectory['hd_obs_distraction_stack'] = np.stack(best_trajectory['hd_obs_distraction_stack'])
         best_trajectory['hd_obs_no_distraction_stack'] = np.stack(best_trajectory['hd_obs_no_distraction_stack'])
         # best_trajectory['pixel_nobs'] = np.stack(best_trajectory['pixel_nobs'])
         best_trajectory['action'] = np.stack(best_trajectory['action'])
         best_trajectory['reward'] = np.stack(best_trajectory['reward'])
+        if 'Maze' not in self.cfg.env:
+            best_trajectory['hd_obs_distraction_stack'] = np.stack(best_trajectory['hd_obs_distraction_stack'])
+            best_trajectory['hd_obs_distraction'] = np.stack(best_trajectory['hd_obs_distraction'])
+            best_trajectory['internal_state'] = np.stack(best_trajectory['internal_state'])
 
         # import pdb;pdb.set_trace()
 
