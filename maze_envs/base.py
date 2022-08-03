@@ -157,7 +157,7 @@ class Env(gym.Env):
                mode='human',
                width=400,
                height=400,
-               camera_id=0,
+               camera_id=None,
                camera_name=None):
         if mode == 'rgb_array':
             # import pdb;pdb.set_trace()
@@ -175,6 +175,7 @@ class Env(gym.Env):
 
             # self._get_viewer(mode)
 
+            import pdb;pdb.set_trace()
             self._get_viewer(mode).render(width, height, camera_id=camera_id)
             # window size used for old mujoco-py:
             data = self._get_viewer(mode).read_pixels(width, height, depth=False)
