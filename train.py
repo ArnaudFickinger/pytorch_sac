@@ -29,7 +29,7 @@ def make_maze(cfg):
     from gym.wrappers import TimeLimit
     from maze_envs import MazeEnd_PointMass
     maze_id = int(cfg.env.split('_')[1])
-    env = MazeEnd_PointMass(maze_id=maze_id, seed=cfg.seed)
+    env = MazeEnd_PointMass(maze_id=maze_id, seed=cfg.seed, dense=cfg.dense_reward)
 
     if cfg.time_limit > 0:
         env = TimeLimit(env, cfg.time_limit)

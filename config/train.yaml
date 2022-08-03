@@ -12,6 +12,8 @@ replay_buffer_capacity: ${num_train_steps}
 
 num_seed_steps: 5000
 
+dense_reward: true
+
 eval_frequency: 10000
 save_demo_frequency: 100000
 num_eval_episodes: 1

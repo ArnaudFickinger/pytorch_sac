@@ -267,7 +267,7 @@ class Maze(Env):
     SKILL_DIM = 2 # X, Y
     TASK_DIM = 4 # agent position, goal position.
 
-    def __init__(self, seed, model_path=None, maze_id=0, random_start=False):
+    def __init__(self, seed,  dense=True,  model_path=None, maze_id=0, random_start=False):
         self.MAZE_ID = maze_id
         if model_path is None:
             model_path = os.path.join(os.path.dirname(__file__), "assets", self.ASSET)
@@ -276,6 +276,7 @@ class Maze(Env):
         self.STRUCTURE, self.DENSE_REWARD, self.DENSE_REWARD_DIRECTION, self.possible_starts = construct_maze(maze_id=self.MAZE_ID, length=1)
         self.interm_goals = {}
         self.vel_rew = {}
+        self.dense = dense
 
         self.random_start = random_start
 
@@ -505,6 +506,9 @@ class Maze(Env):
         extra['dmc_obs'] = obs_dic
         extra['dense_reward'] = dense_reward
 
+        if self.dense:
+            return obs, dense_reward, done, extra
+
         
         return obs, reward, done, extra
 
@@ -516,7 +520,7 @@ class MazeEnd_PointMass(Maze):
     AGENT_DIM = 2
     FRAME_SKIP = 3
 
-    def __init__(self, seed, maze_id=0, random_start=False):
+    def __init__(self, seed, dense=True, maze_id=0, random_start=False):
         self._frames_no_distraction = deque([], maxlen=3)
         super(MazeEnd_PointMass, self).__init__(seed=seed, maze_id=maze_id, random_start=random_start)
 
