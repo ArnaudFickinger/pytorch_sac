@@ -523,8 +523,7 @@ class MazeEnd_PointMass(Maze):
     def get_render(self):
         obs = self.render(
             height=256,
-            width=256,
-            camera_id=self._camera_id
+            width=256
         )
         obs_no_distraction = obs.transpose(2, 0, 1).copy()
         return obs_no_distraction

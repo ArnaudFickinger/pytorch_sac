@@ -157,7 +157,7 @@ class Env(gym.Env):
                mode='human',
                width=400,
                height=400,
-               camera_id=None,
+               camera_id=0,
                camera_name=None):
         if mode == 'rgb_array':
             # import pdb;pdb.set_trace()
