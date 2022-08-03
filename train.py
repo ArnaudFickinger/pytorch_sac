@@ -38,7 +38,7 @@ def make_maze(cfg):
 def make_env(cfg):
     """Helper function to create dm_control environment"""
     if 'Maze' in cfg.env:
-        return make_maze(cfg)
+        env = make_maze(cfg)
 
     if cfg.env == 'ball_in_cup_catch':
         domain_name = 'ball_in_cup'
@@ -52,6 +52,7 @@ def make_env(cfg):
                        seed=cfg.seed,
                        visualize_reward=False,
                        frame_skip=4)
+
     env.seed(cfg.seed)
     assert env.action_space.low.min() >= -1
     assert env.action_space.high.max() <= 1
