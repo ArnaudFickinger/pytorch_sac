@@ -29,16 +29,19 @@ def make_maze(cfg):
     from gym.wrappers import TimeLimit
     from maze_envs import MazeEnd_PointMass
     maze_id = int(cfg.env.split('_')[1])
-    env = MazeEnd_PointMass(maze_id=maze_id)
+    env = MazeEnd_PointMass(maze_id=maze_id, seed=cfg.seed)
 
     if cfg.time_limit > 0:
         env = TimeLimit(env, cfg.time_limit)
+
+    assert env.action_space.low.min() >= -1
+    assert env.action_space.high.max() <= 1
     return env
 
 def make_env(cfg):
     """Helper function to create dm_control environment"""
     if 'Maze' in cfg.env:
-        env = make_maze(cfg)
+        return make_maze(cfg)
 
     if cfg.env == 'ball_in_cup_catch':
         domain_name = 'ball_in_cup'
@@ -58,7 +61,6 @@ def make_env(cfg):
     assert env.action_space.high.max() <= 1
 
     return env
-
 
 class Workspace(object):
     def __init__(self, cfg):

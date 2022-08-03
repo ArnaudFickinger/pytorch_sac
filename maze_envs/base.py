@@ -62,7 +62,7 @@ class Env(gym.Env):
     FRAME_SKIP = None
     NSUBSTEPS = 1
 
-    def __init__(self, model_path=None, frame_skip=None):
+    def __init__(self, seed, model_path=None, frame_skip=None):
         if model_path is None:
             model_path = self.ASSET
         if frame_skip is None:
@@ -95,15 +95,16 @@ class Env(gym.Env):
         low, high = bounds.T
         self.action_space = spaces.Box(low=low, high=high, dtype=np.float32)
 
-        action = self.action_space.sample()
+        # action = self.action_space.sample()
         # observation, _reward, done, _info = self.step(action)
+        self.seed(seed=seed)
         observation = self.reset()
         # assert not done
 
         # Set the observation space
         self.observation_space = convert_observation_to_space(observation)
 
-        self.seed()
+
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)

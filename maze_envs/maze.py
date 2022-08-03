@@ -267,7 +267,7 @@ class Maze(Env):
     SKILL_DIM = 2 # X, Y
     TASK_DIM = 4 # agent position, goal position.
 
-    def __init__(self, model_path=None, maze_id=0, random_start=False):
+    def __init__(self, seed, model_path=None, maze_id=0, random_start=False):
         self.MAZE_ID = maze_id
         if model_path is None:
             model_path = os.path.join(os.path.dirname(__file__), "assets", self.ASSET)
@@ -351,7 +351,7 @@ class Maze(Env):
         self.center_goal = np.array([(self.goal_range[0] + self.goal_range[1]) / 2, 
                                      (self.goal_range[2] + self.goal_range[3]) / 2])
 
-        super(Maze, self).__init__(model_path=xml_path)
+        super(Maze, self).__init__(model_path=xml_path, seed=seed)
 
     def sample_goal_pos(self):
         if not self.RANDOM_GOALS:
