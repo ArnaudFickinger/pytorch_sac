@@ -89,7 +89,7 @@ class Workspace(object):
                                           self.device,
                                           universe = self)
 
-        self.video_recorder = VideoRecorder(wandb=self.cfg.wandb)
+        self.video_recorder = VideoRecorder(wandb=self.cfg.wandb, camera_id=1 if 'Maze' not in self.cfg.env else None)
         self.step = 0
         self.duration = 0
         self.episode = 0
