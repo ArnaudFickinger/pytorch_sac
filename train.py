@@ -329,7 +329,7 @@ class Workspace(object):
             obs = next_obs
             episode_step += 1
 
-            if self.cfg.save_demo_frequency> 0 and self.step % self.cfg.save_demo_frequency == 0:
+            if self.step>0 and self.cfg.save_demo_frequency> 0 and self.step % self.cfg.save_demo_frequency == 0:
                 to_save_demo = True
                 self.save_demo_sample = self.step
 
