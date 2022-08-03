@@ -154,7 +154,7 @@ class Env(gym.Env):
             self.sim.step()
 
     def render(self,
-               mode='human',
+               mode='rgb_array',
                width=400,
                height=400,
                camera_id=None,
