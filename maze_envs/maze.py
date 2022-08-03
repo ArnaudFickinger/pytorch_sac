@@ -483,6 +483,7 @@ class Maze(Env):
         extra['obs_no_distraction'] = obs_no_distraction
         extra['obs_no_distraction_stack'] = obs_no_distraction_stack
         extra['obs_render'] = self.get_render()
+
         # Compute the reward
         minx, maxx, miny, maxy = self.goal_range
         x, y = self.get_body_com("torso")[:2]
@@ -499,8 +500,13 @@ class Maze(Env):
         dense_reward = self.get_dense_reward()+reward-1
 
         obs_dic = self.get_obs_dic()
+
+        extra['is_success'] = done
+        extra['dmc_obs'] = obs_dic
+        extra['dense_reward'] = dense_reward
+
         
-        return obs, reward, done, {'is_success' : done, 'dense_reward':dense_reward, 'dmc_obs': obs_dic}
+        return obs, reward, done, extra
 
     def reset(self):
         return NotImplemented
