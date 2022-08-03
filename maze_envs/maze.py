@@ -7,6 +7,7 @@ import tempfile
 import gym
 import xml.etree.ElementTree as ET
 from .base import Env
+from collections import deque
 import math
 
 def construct_maze(maze_id=0, length=1):
@@ -475,6 +476,12 @@ class Maze(Env):
         # import pdb; pdb.set_trace()
         self.do_simulation(action, self.frame_skip)
         obs = self._get_obs()
+        extra = {}
+        obs_no_distraction = self.get_extra()
+        self._frames_no_distraction.append(obs_no_distraction)
+        obs_no_distraction_stack = self.get_extra_stack()
+        extra['obs_no_distraction'] = obs_no_distraction
+        extra['obs_no_distraction_stack'] = obs_no_distraction_stack
         # Compute the reward
         minx, maxx, miny, maxy = self.goal_range
         x, y = self.get_body_com("torso")[:2]
@@ -503,6 +510,7 @@ class MazeEnd_PointMass(Maze):
     FRAME_SKIP = 3
 
     def __init__(self, maze_id=0, random_start=False):
+        self._frames_no_distraction = deque([], maxlen=3)
         super(MazeEnd_PointMass, self).__init__(maze_id=maze_id, random_start=random_start)
 
     def _get_obs(self):
@@ -511,6 +519,27 @@ class MazeEnd_PointMass(Maze):
             self.get_body_com("torso")[:2],
             self.center_goal,
         ])
+
+    def get_render(self):
+        obs = self.render(
+            height=256,
+            width=256,
+            camera_id=self._camera_id
+        )
+        obs_no_distraction = obs.transpose(2, 0, 1).copy()
+        return obs_no_distraction
+
+    def get_extra(self):
+        obs = self.render(mode = 'rgb_array',
+            height=84,
+            width=84,
+        )
+        obs_no_distraction = obs.transpose(2, 0, 1).copy()
+        return obs_no_distraction
+
+    def get_extra_stack(self):
+        assert len(self._frames_no_distraction) == 3
+        return np.concatenate(list(self._frames_no_distraction), axis=0)
 
     def get_obs_dic(self):
         # import pdb; pdb.set_trace()
