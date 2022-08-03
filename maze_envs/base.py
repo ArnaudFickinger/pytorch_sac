@@ -96,8 +96,9 @@ class Env(gym.Env):
         self.action_space = spaces.Box(low=low, high=high, dtype=np.float32)
 
         action = self.action_space.sample()
-        observation, _reward, done, _info = self.step(action)
-        assert not done
+        # observation, _reward, done, _info = self.step(action)
+        observation = self.reset()
+        # assert not done
 
         # Set the observation space
         self.observation_space = convert_observation_to_space(observation)
