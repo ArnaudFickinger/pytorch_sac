@@ -175,7 +175,7 @@ class Env(gym.Env):
 
             # self._get_viewer(mode)
 
-            import pdb;pdb.set_trace()
+            # import pdb;pdb.set_trace()
             self._get_viewer(mode).render(width, height, camera_id=camera_id)
             # window size used for old mujoco-py:
             data = self._get_viewer(mode).read_pixels(width, height, depth=False)
