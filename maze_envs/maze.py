@@ -640,6 +640,7 @@ class MazeEnd_PointMass(Maze):
         # return r_pos
     
     def reset(self):
+
         self.sim.reset()
         self.sample_goal_pos()
         if self.VISUALIZE:
@@ -654,4 +655,7 @@ class MazeEnd_PointMass(Maze):
         qvel = self.init_qvel + self.np_random.uniform(low=-0.2, high=0.2, size=self.model.nv)
         # qvel = self.init_qvel
         self.set_state(qpos, qvel)
+        obs_no_distraction = self.get_extra()
+        for _ in range(3):
+            self._frames_no_distraction.append(obs_no_distraction)
         return self._get_obs()
