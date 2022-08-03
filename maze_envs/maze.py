@@ -482,6 +482,7 @@ class Maze(Env):
         obs_no_distraction_stack = self.get_extra_stack()
         extra['obs_no_distraction'] = obs_no_distraction
         extra['obs_no_distraction_stack'] = obs_no_distraction_stack
+        extra['obs_render'] = self.get_render()
         # Compute the reward
         minx, maxx, miny, maxy = self.goal_range
         x, y = self.get_body_com("torso")[:2]
