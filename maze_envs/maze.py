@@ -520,9 +520,9 @@ class MazeEnd_PointMass(Maze):
     AGENT_DIM = 2
     FRAME_SKIP = 3
 
-    def __init__(self, seed, dense=True, maze_id=0, random_start=False):
+    def __init__(self, seed, dense=True, maze_id=0, random_start=True):
         self._frames_no_distraction = deque([], maxlen=3)
-        super(MazeEnd_PointMass, self).__init__(seed=seed, maze_id=maze_id, random_start=random_start)
+        super(MazeEnd_PointMass, self).__init__(dense=dense, seed=seed, maze_id=maze_id, random_start=random_start)
 
     def _get_obs(self):
         return np.concatenate([

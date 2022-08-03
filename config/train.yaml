@@ -7,6 +7,8 @@ env: cheetah_run
 # this needs to be specified manually
 experiment: test_exp
 
+random_start:true
+
 num_train_steps: 1e6
 replay_buffer_capacity: ${num_train_steps}
 
@@ -45,7 +47,7 @@ wandb: true
 
 normalize_reward: false
 
-time_limit: 100
+time_limit: 500
 
 
 # hydra configuration
