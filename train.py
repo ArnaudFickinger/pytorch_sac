@@ -20,6 +20,8 @@ import dmc2gym
 import hydra
 import wandb
 
+import pdb;pdb.set_trace()
+
 import pickle
 
 os.environ["WANDB_API_KEY"] = "0253801d5a4a70a326be214e03ac4f97c1d0beb1"
