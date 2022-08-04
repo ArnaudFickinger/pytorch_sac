@@ -20,7 +20,7 @@ import dmc2gym
 import hydra
 import wandb
 
-import pdb;pdb.set_trace()
+# import pdb;pdb.set_trace()
 
 import pickle
 
